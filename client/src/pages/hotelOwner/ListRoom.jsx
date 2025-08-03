@@ -8,41 +8,18 @@ const ListRoom = () => {
   const [rooms,setRooms]=useState([])
   const {axios,getToken,user,currency} =useAppContext()
 
-  // const fetchRooms=async ()=>{
-  //   try {
-  //     const {data} =await axios.get('/api/rooms/owner',{headers:{Authorization : `Bearer ${await getToken()}`}})
-  //     if(data.success){
-  //       setRooms(data.rooms)
-  //     }else{
-  //       toast.error(data.message)
-  //     }
-  //   } catch (error) {
-  //     toast.error(error.message)
-  //   }
-  // }
-
-  const fetchRooms = async () => {
+  const fetchRooms=async ()=>{
     try {
-        setLoading(true); // Add loading state
-        const { data } = await axios.get('/api/rooms/owner', {
-            headers: { Authorization: `Bearer ${await getToken()}` },
-            timeout: 30000 // Add timeout
-        });
-        
-        if (data.success) {
-            setRooms(data.rooms);
-        } else {
-            toast.error(data.message);
-        }
+      const {data} =await axios.get('/api/rooms/owner',{headers:{Authorization : `Bearer ${await getToken()}`}})
+      if(data.success){
+        setRooms(data.rooms)
+      }else{
+        toast.error(data.message)
+      }
     } catch (error) {
-        const message = error.code === 'ECONNABORTED' 
-            ? 'Request timed out. Please try again.'
-            : error.message;
-        toast.error(message);
-    } finally {
-        setLoading(false);
+      toast.error(error.message)
     }
-};
+  }
 
   const toggleAvailability=async (roomId)=>{
     const {data} =await axios.post('/api/rooms/toggle-availability',{roomId},{headers:{Authorization:`Bearer ${await getToken()}`}})
