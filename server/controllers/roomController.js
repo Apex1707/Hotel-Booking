@@ -47,13 +47,32 @@ export const getRooms=async (req,res)=>{
 }
 
 // API  to get all rooms for a specific hotel
-export const getOwnerRooms=async(req,res)=>{
+export const getOwnerRooms = async (req, res) => {
     try {
-        const hotelData=await Hotel.findOne({owner:req.auth.userId})
-        const rooms=await Room.find({hotel:hotelData._id.toString()}).populate("hotel");
-        res.json({success:true,rooms});
+        const hotelData = await Hotel.findOne({ owner: req.auth.userId })
+            .maxTimeMS(20000);  // Add timeout
+
+        if (!hotelData) {
+            return res.status(404).json({
+                success: false,
+                message: "Hotel not found"
+            });
+        }
+
+        const rooms = await Room.find({ hotel: hotelData._id.toString() })
+            .populate("hotel")
+            .maxTimeMS(20000)  // Add timeout
+            .lean();  // Add lean() for better performance
+
+        res.json({ success: true, rooms });
     } catch (error) {
-        res.json({success:false,message:error.message})
+        console.error('Room fetch error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.name === 'MongoTimeoutError' ? 
+                'Database operation timed out. Please try again.' : 
+                error.message
+        });
     }
 }
 
